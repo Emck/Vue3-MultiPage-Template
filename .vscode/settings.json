@@ -1,0 +1,26 @@
+{
+    "files.exclude": {
+        "package-lock.json": true,
+        "node_modules": true,
+    },
+    "search.exclude": {
+        "logs/*": true
+    },
+    "editor.tabSize": 4,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    // config editor by file ext
+    // -- json editor
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnPaste": true,
+        "editor.formatOnSave": true,
+    },    
+    // -- html editor
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnPaste": true,
+        "editor.formatOnSave": true
+    },
+}
