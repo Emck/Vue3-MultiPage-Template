@@ -7,6 +7,7 @@ import glob from 'glob';
 // https://vitejs.dev/config/
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default defineConfig(async ({ command, mode, ssrBuild }) => {
+    // {command,mode} [dev=serve, development; preview=serve, production; build=build, production]
     const rootPath = 'src/pages';
 
     return {
@@ -28,17 +29,16 @@ export default defineConfig(async ({ command, mode, ssrBuild }) => {
             outDir: resolve(__dirname, 'dist'),
             emptyOutDir: true, // must clean empty outDir
             rollupOptions: {
-                input: makePagesInput(resolve(__dirname, rootPath)), // make rootPath **/index.html to input option
+                input: await makePagesInput(resolve(__dirname, rootPath)), // make rootPath **/index.html to input option
             },
         },
     };
 });
 
 // search index.html, make rollupOptions.input
-function makePagesInput(rootPath: string) {
-    const htmls = glob.sync(rootPath + '/**/index.html');
+async function makePagesInput(rootPath: string) {
     const input: any = {};
-    for (const html of htmls) {
+    for (const html of glob.sync(rootPath + '/**/index.html')) {
         let name = html.substring(rootPath.length, html.lastIndexOf('/index.html'));
         if (name == '') input.main = html;
         else {
