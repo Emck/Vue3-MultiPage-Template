@@ -21,7 +21,7 @@ export async function ModeDev({ server, Config, viteServer, debug }) {
             let html = readFileSync(path.join(Config.RootPath, req.originalUrl, 'index.html'), 'utf-8');
             res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
         } catch (err) {
-            this.viteServer.ssrFixStacktrace(err); // catch error, print info by vite
+            viteServer.ssrFixStacktrace(err); // catch error, print info by vite
             next(err);
         }
     });
