@@ -83,6 +83,8 @@ class WebServer {
             await ModeDev(options); //  setup to Development Mode
         }
 
+        debug('SSR is not supported');
+
         // 5. final error setup
         server.get('*', (req, res) => res.status(404).send('404'));
 

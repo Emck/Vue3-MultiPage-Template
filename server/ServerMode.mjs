@@ -1,5 +1,6 @@
 import path from 'node:path'; //                about path
 import { readFileSync } from 'node:fs'; //      about fs
+import express from 'express'; //               express
 
 // Development Mode
 export async function ModeDev({ server, Config, viteServer, debug }) {
@@ -27,9 +28,6 @@ export async function ModeDev({ server, Config, viteServer, debug }) {
 }
 
 // Production Mode
-// eslint-disable-next-line no-unused-vars
-export async function ModeProd({ server, Config, viteServer, debug }) {
-    debug('ModeProd currently unavailable');
-    // TODO: ModeProd
-    // server.use(express.static(this.Config.RootPath));
+export async function ModeProd({ server, Config }) {
+    server.use(express.static(Config.RootPath));
 }
