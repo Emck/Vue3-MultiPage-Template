@@ -77,7 +77,7 @@ class WebServer {
         parent = parent || '';
         if (stack) {
             stack.forEach(function (r) {
-                // Tips: 排除默认匹配规则 *
+                // Tips: exclude default match rules **
                 if (r.route && r.route.path && r.route.path != '*') {
                     for (let method in r.route.methods) {
                         if (r.route.methods[method]) {
@@ -91,11 +91,11 @@ class WebServer {
                     }
                 } else if (r.handle && r.handle.name == 'router') {
                     const routerName = r.regexp.source.replace('^\\', '').replace('\\/?(?=\\/|$)', '').replace(/\\\//g, '/').replace('/?(?=/|$)', ''); // fix source is root = '^\/?(?=\/|$)'
-                    return that.listRoutes(routes, r.handle.stack, parent + routerName); // 递归调用
+                    return that.listRoutes(routes, r.handle.stack, parent + routerName); // recursive call
                 }
             });
             return routes;
-        } else return that.listRoutes([], server._router.stack); // 递归调用
+        } else return that.listRoutes([], server._router.stack); // recursive call
     }
 
     // run listen...
@@ -134,11 +134,14 @@ class WebServer {
         // 7. start listen
         server.listen(this.Config.Host.port, this.Config.Host.host, () => {
             let baseurl = 'http://' + this.Config.Host.host + ':' + this.Config.Host.port;
-            debug('Server running at: ' + baseurl);
-            debug('Routers:');
-            let Routes = this.listRoutes(); // show routes
-            for (let Route of Routes) {
-                debug('  ' + Route.path.padEnd(30) + Route.method.padEnd(10) + baseurl + Route.path);
+            if (debug.enabled == undefined) console.log('Server running at: ' + baseurl);
+            else {
+                debug('Server running at: ' + baseurl);
+                debug('Routers:');
+                let Routes = this.listRoutes(); // show routes
+                for (let Route of Routes) {
+                    debug('  ' + Route.path.padEnd(30) + Route.method.padEnd(10) + baseurl + Route.path);
+                }
             }
         });
     }
