@@ -10,10 +10,6 @@ import Debug from 'debug';
 
 const debug = Debug('server'); //   create debug instance
 const server = express(); //        create express instance
-const defaultHost = {
-    host: 'localhost', //           default server host
-    port: 3000, //                  default server port
-};
 
 class WebServer {
     constructor() {
@@ -21,7 +17,7 @@ class WebServer {
         this.isProduction = process.env.NODE_ENV == 'development' ? false : true;
         this.Config = {
             RootPath: null, //          pages root path
-            Host: defaultHost, //       server host default config
+            Host: null, //              server host default config
         };
         this.viteServer = null; //      vite server instance
     }
@@ -35,27 +31,31 @@ class WebServer {
     // create vite server
     async createViteServer() {
         // create vite by middlewareMode
-        this.viteServer = await createViteServer({
+        let viteServer = await createViteServer({
             mode: this.isProduction == true ? 'production' : 'development',
             server: { middlewareMode: true },
             appType: 'custom',
         });
         if (this.isProduction) {
-            this.Config.RootPath = this.viteServer.config.build.outDir; //  use build out dir
-            this.Config.Host = this.viteServer.config.preview; //           use preview server
+            this.Config.RootPath = viteServer.config.build.outDir; //   use build out dir
+            this.Config.Host = viteServer.config.preview; //            use preview server
+            // only deep copy config
+            this.Config = JSON.parse(JSON.stringify(this.Config));
         } else {
-            this.Config.RootPath = this.viteServer.config.root; //  user root dir
-            this.Config.Host = this.viteServer.config.server; //    user server
+            this.Config.RootPath = viteServer.config.root; //           user root dir
+            this.Config.Host = viteServer.config.server; //             user server
+            // save vite server instance
+            this.viteServer = viteServer;
         }
-        // fix undefined
-        this.Config.Host.host = this.Config.Host.host || defaultHost.host;
-        this.Config.Host.port = this.Config.Host.port || defaultHost.port;
         // check root path
         if (!existsSync(this.Config.RootPath)) {
             debug('Root Path is not exists %s', this.Config.RootPath);
             // eslint-disable-next-line no-undef
             process.exit();
         }
+        // fix undefined
+        this.Config.Host.host = this.Config.Host.host || 'localhost'; //    default server host
+        this.Config.Host.port = this.Config.Host.port || 3000; //           default server port
     }
 
     // add route to express
@@ -116,22 +116,20 @@ class WebServer {
         server.use(cookieParser()); //                                          parser cookie
         server.use(compression()); //                                           on compression
 
-        // 3. create view server
-        await this.createViteServer();
-        debug('SSR is not supported');
-
-        // 4. add router by server/router/**/*.mjs to route
+        // 3. add router from server/router/**/*.mjs to route
         await this.addRoute(fileURLToPath(new URL('./router', import.meta.url)), false);
 
-        // 5. run different modes
+        // 4. run different modes
+        await this.createViteServer(); // create vite server
         let options = { server: server, Config: this.Config, viteServer: this.viteServer, debug: debug };
-        if (this.isProduction) await ModeProd(options); // setup to Production Mode
-        else await ModeDev(options); //  setup to Development Mode
+        debug('SSR is not supported');
+        if (this.isProduction) await ModeProd(options); //      setup to Production Mode
+        else ModeDev(options); //                               setup to Development Mode
 
-        // 6. final error setup
+        // 5. final error setup
         server.get('*', (req, res) => res.status(404).send('404'));
 
-        // 7. start listen
+        // 6. start listen
         server.listen(this.Config.Host.port, this.Config.Host.host, () => {
             let baseurl = 'http://' + this.Config.Host.host + ':' + this.Config.Host.port;
             if (debug.enabled == undefined) console.log('Server running at: ' + baseurl);

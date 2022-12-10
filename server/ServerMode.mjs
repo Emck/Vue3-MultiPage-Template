@@ -23,6 +23,13 @@ export async function ModeDev({ server, Config, viteServer, debug }) {
 }
 
 // Production Mode
-export async function ModeProd({ server, Config }) {
+export async function ModeProd({ server, Config, debug }) {
     server.use(express.static(Config.RootPath));
+
+    // support vue route
+    server.use('*', (req, res) => {
+        let source = req.originalUrl.replace(/.([^/]*)$/, '/index.html');
+        debug('Access: ' + req.originalUrl.padEnd(23) + ' Source: ' + source);
+        send(req, source, { root: Config.RootPath }).pipe(res); //  output to client
+    });
 }
