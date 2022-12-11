@@ -39,7 +39,7 @@ class WebServer {
         if (this.isProduction) {
             this.Config.RootPath = viteServer.config.build.outDir; //   use build out dir
             this.Config.Host = viteServer.config.preview; //            use preview server
-            // only deep copy config
+            // deep copy config
             this.Config = JSON.parse(JSON.stringify(this.Config));
         } else {
             this.Config.RootPath = viteServer.config.root; //           user root dir

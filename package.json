@@ -10,6 +10,7 @@
         "preview": "vite preview",
         "build-only": "vite build",
         "type-check": "vue-tsc --noEmit",
+        "app": "node app/main.mjs",
         "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
     },
     "dependencies": {
@@ -22,7 +23,7 @@
     "devDependencies": {
         "@rushstack/eslint-patch": "^1.2.0",
         "@types/glob": "^8.0.0",
-        "@types/node": "^18.11.12",
+        "@types/node": "^18.11.13",
         "@vitejs/plugin-vue": "^4.0.0",
         "@vue/eslint-config-prettier": "^7.0.0",
         "@vue/eslint-config-typescript": "^11.0.2",

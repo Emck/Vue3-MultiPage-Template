@@ -30,6 +30,11 @@ export default defineConfig(async ({ command, mode, ssrBuild }) => {
             emptyOutDir: true, // must clean empty outDir
             rollupOptions: {
                 input: await makePagesInput(resolve(__dirname, rootPath)), // make rootPath **/index.html to input option
+                // output: {
+                //     chunkFileNames: 'assets/[name]-[hash].js', //       default
+                //     entryFileNames: 'assets/[name]-[hash].js', //       default
+                //     assetFileNames: 'assets/[name]-[hash][extname]', // default
+                // },
             },
         },
     };

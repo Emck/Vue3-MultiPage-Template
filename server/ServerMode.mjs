@@ -3,17 +3,15 @@ import send from 'send'; //             send
 
 // Development Mode
 export async function ModeDev({ server, Config, viteServer, debug }) {
-    // 1. vite middlewares, support /favicon.ico, /public
-    server.use(viteServer.middlewares);
+    server.use(viteServer.middlewares); // vite middlewares (exclude index)
+    server.use('*', async (req, res, next) => {
+        // support vue route  (originalUrl endwith '/', to be replace '/index.html')
+        //   if originalUrl is /example, /example path is a route by / vue app, then /index.html should be send
+        let newUrl = req.originalUrl.replace(/.([^/]*)$/, '/index.html'); //
+        debug('Access: ' + req.originalUrl.padEnd(23) + ' Url: ' + newUrl);
 
-    // 2. denied access /assets
-    server.use('/assets', (_req, res) => res.status(404).send('404'));
-
-    // 3. support vue route
-    server.use('*', (req, res, next) => {
-        let source = req.originalUrl.replace(/.([^/]*)$/, '/index.html');
-        debug('Access: ' + req.originalUrl.padEnd(23) + ' Source: ' + source);
-        send(req, source, { root: Config.RootPath })
+        // SSR function is implemented here
+        send(req, newUrl, { root: Config.RootPath })
             .on('error', (err) => {
                 viteServer.ssrFixStacktrace(err); // catch error, print info by vite
                 next(err);
@@ -24,12 +22,14 @@ export async function ModeDev({ server, Config, viteServer, debug }) {
 
 // Production Mode
 export async function ModeProd({ server, Config, debug }) {
-    server.use(express.static(Config.RootPath));
-
-    // support vue route
+    server.use(express.static(Config.RootPath, { index: false })); // exclude index
     server.use('*', (req, res) => {
-        let source = req.originalUrl.replace(/.([^/]*)$/, '/index.html');
-        debug('Access: ' + req.originalUrl.padEnd(23) + ' Source: ' + source);
-        send(req, source, { root: Config.RootPath }).pipe(res); //  output to client
+        // support vue route  (originalUrl endwith '/', to be replace '/index.html')
+        //   if originalUrl is /example, /example path is a route by / vue app, then /index.html should be send
+        let newUrl = req.originalUrl.replace(/.([^/]*)$/, '/index.html'); //
+        debug('Access: ' + req.originalUrl.padEnd(23) + ' Url: ' + newUrl);
+
+        // SSR function is implemented here
+        send(req, newUrl, { root: Config.RootPath }).pipe(res); //  output to client
     });
 }
